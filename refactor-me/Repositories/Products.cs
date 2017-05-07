@@ -1,7 +1,9 @@
 ﻿using refactor_me.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace refactor_me.Repositories
 {
@@ -15,31 +17,31 @@ namespace refactor_me.Repositories
         }
 
         //save changes to database
-        public int SaveChanges()
+        public async Task<int> SaveChanges()
         {
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         //gets all products
-        public IEnumerable<Product> GetAll()
+        public async Task<IEnumerable<Product>> GetAll()
         {
-            return _context.Products.ToList<Product>();
+            return await _context.Products.ToListAsync<Product>();
         }
 
         //finds all products matching the specified name
-        public IEnumerable<Product> Find(string name)
+        public async Task<IEnumerable<Product>> Find(string name)
         {
-            return _context.Products.Where(e => e.Name.Contains(name)).ToList<Product>();
+            return await _context.Products.Where(e => e.Name.Contains(name)).ToListAsync<Product>();
         }
 
         //gets the project that matches the specified ID - ID is a GUID
-        public Product Find(Guid id)
+        public async Task<Product> Find(Guid id)
         {
-            return _context.Products.FirstOrDefault(e => e.Id == id);
+            return await _context.Products.FirstOrDefaultAsync(e => e.Id == id);
         }
 
         //creates a new product
-        public int Add(Product item)
+        public async Task<int> Add(Product item)
         {
             var product = new Product
             {
@@ -50,32 +52,32 @@ namespace refactor_me.Repositories
                 DeliveryPrice = item.DeliveryPrice
             };
             _context.Products.Add(product);
-            return SaveChanges();
+            return await SaveChanges();
         }
 
         //updates a product
-        public int Update(Product item)
+        public async Task<int> Update(Product item)
         {
-            var product = _context.Products.FirstOrDefault(e => e.Id == item.Id);
+            var product = await _context.Products.FirstOrDefaultAsync(e => e.Id == item.Id);
             if (product != null)
             {
                 product.Name = item.Name;
                 product.Description = item.Description;
                 product.Price = item.Price;
                 product.DeliveryPrice = item.DeliveryPrice;
-                return SaveChanges();
+                return await SaveChanges();
             }
             return 0;
         }
 
         //deletes a product and its options
-        public int Delete(Guid id)
+        public async Task<int> Delete(Guid id)
         {
-            var product = _context.Products.FirstOrDefault(e => e.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(e => e.Id == id);
             if (product != null)
             {
                 _context.Products.Remove(product);
-                return SaveChanges();
+                return await SaveChanges();
             }
             return 0;
         }

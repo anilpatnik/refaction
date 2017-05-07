@@ -1,7 +1,9 @@
 ﻿using refactor_me.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace refactor_me.Repositories
 {
@@ -15,28 +17,28 @@ namespace refactor_me.Repositories
         }
 
         //save changes to database
-        public int SaveChanges()
+        public async Task<int> SaveChanges()
         {
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         //finds all options for a specified product
-        public IEnumerable<ProductOption> GetAll(Guid productId)
+        public async Task<IEnumerable<ProductOption>> GetAll(Guid productId)
         {
-            return _context.ProductOptions
+            return await _context.ProductOptions
                 .Where(e => e.ProductId == productId)
-                .ToList<ProductOption>();
+                .ToListAsync<ProductOption>();
         }
 
         //finds the specified product option for the specified product
-        public ProductOption Find(Guid productId, Guid id)
+        public async Task<ProductOption> Find(Guid productId, Guid id)
         {
-            return _context.ProductOptions
-                .FirstOrDefault(e => e.ProductId == productId && e.Id == id);
+            return await _context.ProductOptions
+                .FirstOrDefaultAsync(e => e.ProductId == productId && e.Id == id);
         }
 
         //adds a new product option to the specified product
-        public int Add(ProductOption item)
+        public async Task<int> Add(ProductOption item)
         {
             var productOption = new ProductOption
             {
@@ -46,30 +48,30 @@ namespace refactor_me.Repositories
                 ProductId = item.ProductId
             };
             _context.ProductOptions.Add(productOption);
-            return SaveChanges();
+            return await SaveChanges();
         }
 
         //updates the specified product option
-        public int Update(ProductOption item)
+        public async Task<int> Update(ProductOption item)
         {
-            var productOption = _context.ProductOptions.FirstOrDefault(e => e.Id == item.Id);
+            var productOption = await _context.ProductOptions.FirstOrDefaultAsync(e => e.Id == item.Id);
             if (productOption != null)
             {
                 productOption.Name = item.Name;
                 productOption.Description = item.Description;
-                return SaveChanges();
+                return await SaveChanges();
             }
             return 0;
         }
 
         //deletes the specified product option
-        public int Delete(Guid id)
+        public async Task<int> Delete(Guid id)
         {
-            var productOptions = _context.ProductOptions.FirstOrDefault(e => e.Id == id);
+            var productOptions = await _context.ProductOptions.FirstOrDefaultAsync(e => e.Id == id);
             if (productOptions != null)
             {
                 _context.ProductOptions.Remove(productOptions);
-                return SaveChanges();
+                return await SaveChanges();
             }
             return 0;
         }
