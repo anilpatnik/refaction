@@ -1,115 +1,125 @@
-﻿using System;
-using System.Net;
+﻿using refactor_me.Models;
+using refactor_me.Repositories;
+using System;
 using System.Web.Http;
-using refactor_me.Models;
 
 namespace refactor_me.Controllers
 {
     [RoutePrefix("products")]
     public class ProductsController : ApiController
     {
-        [Route]
-        [HttpGet]
-        public Products GetAll()
+        private IProducts _products;
+        private IProductOptions _productOptions;
+
+        public ProductsController(IProducts products, IProductOptions productOptions)
         {
-            return new Products();
+            _products = products;
+            _productOptions = productOptions;
         }
 
-        [Route]
-        [HttpGet]
-        public Products SearchByName(string name)
+        //Error handler with return results
+        //returns ok when success else returns bad request
+        public IHttpActionResult Error<T>(Func<T> func)
         {
-            return new Products(name);
+            try
+            {
+                return Ok(func());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
+        //GET /products - gets all products
+        [Route]
+        [HttpGet]
+        public IHttpActionResult GetAll()
+        {
+            return Error(() => _products.GetAll());
+        }
+
+        //GET /products?name={name} - finds all products matching the specified name
+        [Route]
+        [HttpGet]
+        public IHttpActionResult SearchByName(string name)
+        {
+            return Error(() => _products.Find(name));
+        }
+
+        //GET /products/{id} - gets the project that matches the specified ID - ID is a GUID
         [Route("{id}")]
         [HttpGet]
-        public Product GetProduct(Guid id)
+        public IHttpActionResult GetProduct(Guid id)
         {
-            var product = new Product(id);
-            if (product.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-
-            return product;
+            return Error(() => _products.Find(id));
         }
 
+        //POST /products - creates a new product
         [Route]
         [HttpPost]
-        public void Create(Product product)
+        public IHttpActionResult Create(Product product)
         {
-            product.Save();
+            return Error(() => _products.Add(product));
         }
 
+        //PUT /products/{id} - updates a product
         [Route("{id}")]
         [HttpPut]
-        public void Update(Guid id, Product product)
+        public IHttpActionResult Update(Guid id, Product product)
         {
-            var orig = new Product(id)
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                DeliveryPrice = product.DeliveryPrice
-            };
-
-            if (!orig.IsNew)
-                orig.Save();
+            product.Id = id;
+            return Error(() => _products.Update(product));
         }
 
+        //DELETE /products/{id} - deletes a product and its options
         [Route("{id}")]
         [HttpDelete]
-        public void Delete(Guid id)
+        public IHttpActionResult Delete(Guid id)
         {
-            var product = new Product(id);
-            product.Delete();
+            return Error(() => _products.Delete(id));
         }
 
+        //GET /products/{id}/options - finds all options for a specified product
         [Route("{productId}/options")]
         [HttpGet]
-        public ProductOptions GetOptions(Guid productId)
+        public IHttpActionResult GetOptions(Guid productId)
         {
-            return new ProductOptions(productId);
+            return Error(() => _productOptions.GetAll(productId));
         }
 
+        //GET /products/{id}/options/{optionId} - finds the specified product option for the specified product
         [Route("{productId}/options/{id}")]
         [HttpGet]
-        public ProductOption GetOption(Guid productId, Guid id)
+        public IHttpActionResult GetOption(Guid productId, Guid id)
         {
-            var option = new ProductOption(id);
-            if (option.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-
-            return option;
+            return Error(() => _productOptions.Find(productId, id));
         }
 
+        //POST /products/{id}/options - adds a new product option to the specified product
         [Route("{productId}/options")]
         [HttpPost]
-        public void CreateOption(Guid productId, ProductOption option)
+        public IHttpActionResult CreateOption(Guid productId, ProductOption option)
         {
             option.ProductId = productId;
-            option.Save();
+            return Error(() => _productOptions.Add(option));
         }
 
+        //PUT /products/{id}/options/{optionId} - updates the specified product option
         [Route("{productId}/options/{id}")]
         [HttpPut]
-        public void UpdateOption(Guid id, ProductOption option)
+        public IHttpActionResult UpdateOption(Guid id, ProductOption option)
         {
-            var orig = new ProductOption(id)
-            {
-                Name = option.Name,
-                Description = option.Description
-            };
-
-            if (!orig.IsNew)
-                orig.Save();
+            option.Id = id;
+            return Error(() => _productOptions.Update(option));
         }
 
+        //DELETE /products/{id}/options/{optionId} - deletes the specified product option
         [Route("{productId}/options/{id}")]
         [HttpDelete]
-        public void DeleteOption(Guid id)
+        public IHttpActionResult DeleteOption(Guid id)
         {
-            var opt = new ProductOption(id);
-            opt.Delete();
+            return Error(() => _productOptions.Delete(id));
         }
     }
 }
