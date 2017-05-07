@@ -28,7 +28,9 @@ namespace refactor_me.Controllers
             }
             catch (Exception ex)
             {
-                return await Task.Run(() => BadRequest(ex.Message));
+                //TODO: implement exception logging
+                
+                return await Task.Run(() => NotFound());
             }
         }
 
