@@ -1,10 +1,10 @@
-﻿using Microsoft.Practices.Unity;
-using System;
-using System.Collections.Generic;
-using System.Web.Http.Dependencies;
-
-namespace refactor_me.Repositories
+﻿namespace refactor_me.Repositories
 {
+    using Microsoft.Practices.Unity;
+    using System;
+    using System.Collections.Generic;
+    using System.Web.Http.Dependencies;
+
     public class UnityResolver : IDependencyResolver
     {
         protected IUnityContainer container;

@@ -9,7 +9,7 @@ namespace refactor_me.Repositories
 {
     public class Products : IProducts
     {
-        private readonly ProductsContext _context;
+        private ProductsContext _context;
 
         public Products(ProductsContext context)
         {

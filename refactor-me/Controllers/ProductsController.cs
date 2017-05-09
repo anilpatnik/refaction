@@ -1,4 +1,5 @@
-﻿using refactor_me.Models;
+﻿using log4net;
+using refactor_me.Models;
 using refactor_me.Repositories;
 using System;
 using System.Threading.Tasks;
@@ -9,17 +10,19 @@ namespace refactor_me.Controllers
     [RoutePrefix("products")]
     public class ProductsController : ApiController
     {
+        private ILog _log;
         private IProducts _products;
         private IProductOptions _productOptions;
 
-        public ProductsController(IProducts products, IProductOptions productOptions)
+        public ProductsController(ILog log, IProducts products, IProductOptions productOptions)
         {
+            _log = log;
             _products = products;
             _productOptions = productOptions;
         }
 
         //Error handler with return results
-        //returns ok when success else returns bad request
+        //returns ok when success else returns not found
         public async Task<IHttpActionResult> Error<T>(Func<T> func)
         {
             try
@@ -28,8 +31,8 @@ namespace refactor_me.Controllers
             }
             catch (Exception ex)
             {
-                //TODO: implement exception logging
-                
+                _log.Error(ex); //logs to the file
+
                 return await Task.Run(() => NotFound());
             }
         }
